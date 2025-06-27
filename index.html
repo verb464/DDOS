@@ -1,19 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Welcome</title>
+  <meta charset="UTF-8">
+  <title>YOU'RE BEING WATCHED</title>
   <style>
-    body { 
-      background-color: black; 
-      color: lime; 
-      font-family: monospace; 
-      text-align: center; 
-      margin-top: 100px;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: black;
+      color: red;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      flex-direction: column;
+    }
+
+    h1 {
+      font-size: 3rem;
+      text-align: center;
+      animation: flicker 0.15s infinite;
+    }
+
+    .subtext {
+      color: white;
+      font-size: 1.2rem;
+      margin-top: 20px;
+      animation: glitch 1s infinite;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 1; }
+      50% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(-2px, -2px); }
+      60% { transform: translate(2px, 2px); }
+      80% { transform: translate(2px, -2px); }
+      100% { transform: translate(0); }
     }
   </style>
 </head>
 <body>
-  <h1>We See You</h1>
-  <p>Your IP has been logged.</p>
+  <audio autoplay loop>
+    <source src="https://files.catbox.moe/6ddk7c.mp3" type="audio/mp3">
+  </audio>
+  <h1>IP LOGGED ⚠️</h1>
+  <div class="subtext">Your location has been traced.</div>
+  <div class="subtext">This device is now being monitored.</div>
+  <div class="subtext">There's no point in hiding.</div>
 </body>
 </html>
