@@ -1,68 +1,355 @@
-// Function to update info with real data
-async function updateInfo() {
-  // Fetch IP & geo info
-  let ipData = await fetch('https://ipapi.co/json/').then(res => res.json()).catch(() => ({}));
-  
-  // Battery info
-  let battery = null;
-  if (navigator.getBattery) {
-    battery = await navigator.getBattery();
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>💀 BROADYG.EXE 💀</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: black;
+      font-family: monospace;
+      color: red;
+      overflow: hidden;
+      text-align: center;
+    }
 
-  // Local time
-  let localTime = new Date().toLocaleTimeString();
+    body.flash {
+      animation: flash-bg 0.1s infinite;
+    }
 
-  // Browser and OS
-  const browser = navigator.userAgent;
-  const os = navigator.platform;
+    @keyframes flash-bg {
+      0% { background: red; }
+      50% { background: white; }
+      100% { background: black; }
+    }
 
-  // Battery percent
-  let batteryLevel = battery ? Math.round(battery.level * 100) + '%' : 'Unknown';
+    h1 {
+      font-size: 3rem;
+      margin-top: 80px;
+      animation: shake 0.4s infinite;
+    }
 
-  // Location fallback text
-  const city = ipData.city || 'Unknown City';
-  const country = ipData.country_name || 'Unknown Country';
+    @keyframes shake {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(-3px, 3px); }
+      50% { transform: translate(3px, -3px); }
+      75% { transform: translate(-2px, 2px); }
+    }
 
-  // Show info
-  const infoEl = document.getElementById('info');
-  infoEl.innerHTML = `
-    IP: ${ipData.ip || 'Unknown IP'}<br>
-    Location: ${city}, ${country}<br>
-    Battery: ${batteryLevel}<br>
-    Local Time: ${localTime}<br>
-    Device: ${os}<br>
-    Browser: ${browser}<br>
-  `;
+    #countdown {
+      font-size: 2rem;
+      margin-top: 20px;
+    }
 
-  // Hacking status messages cycling
-  const statusMessages = [
-    "Rootkit Installed",
-    "Firewall Disabled",
-    "System Integrity Compromised",
-    "Memory Leak Detected",
-    "Remote Access Enabled",
-    "Disk Sector Failure",
-    "CPU Overheating",
-  ];
+    #info {
+      font-size: 1.3rem;
+      margin-top: 20px;
+      color: yellow;
+      animation: flash-text 1s infinite;
+      max-width: 90vw;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+      user-select: none;
+    }
 
-  let index = 0;
-  setInterval(() => {
-    infoEl.innerHTML += `<br><span style="color:orange;">Status: ${statusMessages[index]}</span>`;
-    index = (index + 1) % statusMessages.length;
-  }, 4000);
-}
+    @keyframes flash-text {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
 
-// Call it once and then every 10 seconds update local time & battery
-updateInfo();
-setInterval(() => {
-  // Just update local time & battery level without refetching IP/Geo
-  const infoEl = document.getElementById('info');
-  const localTime = new Date().toLocaleTimeString();
+    #jumpscare {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
 
-  navigator.getBattery && navigator.getBattery().then(battery => {
-    const batteryLevel = battery ? Math.round(battery.level * 100) + '%' : 'Unknown';
-    // Update only local time and battery by replacing lines inside the info
-    infoEl.innerHTML = infoEl.innerHTML.replace(/Local Time: .*?<br>/, `Local Time: ${localTime}<br>`);
-    infoEl.innerHTML = infoEl.innerHTML.replace(/Battery: .*?<br>/, `Battery: ${batteryLevel}<br>`);
-  });
-}, 10000);
+    #jumpscare img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #bsod {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0000aa;
+      color: white;
+      font-family: monospace;
+      font-size: 1.2rem;
+      padding: 50px;
+      z-index: 10000;
+      text-align: left;
+    }
+
+    .popup {
+      position: fixed;
+      background: white;
+      color: black;
+      border: 3px solid red;
+      padding: 15px;
+      z-index: 999;
+      font-weight: bold;
+      box-shadow: 0 0 20px red;
+      animation: shake 0.3s infinite;
+    }
+
+    #startBtn {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 40px;
+      font-size: 1.5rem;
+      background: red;
+      color: white;
+      border: none;
+      z-index: 10001;
+      cursor: pointer;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <button id="startBtn">CLICK TO START</button>
+
+  <div id="main" style="display:none" class="flash">
+    <h1>SYSTEM BREACH DETECTED</h1>
+    <div id="countdown">Wipe begins in: 0:30</div>
+    <div id="info">Locating target device...</div>
+
+    <div id="jumpscare">
+      <img src="https://media.tenor.com/wC6F0gGEM1gAAAAC/jumpscare.gif" alt="SCREAM" />
+    </div>
+
+    <div id="bsod">
+      😵 A critical system failure has occurred.<br /><br />
+      BROADYG_FATAL_ERROR<br /><br />
+      *** STOP: 0x000000FE (BROADYG.EXE, SYSTEM_OVERRUN, 0x00000000)<br />
+      Collecting data for crash dump...<br />
+      Initializing disk for memory dump...<br />
+      The system has been halted.<br /><br />
+      <i>You're not safe.</i>
+    </div>
+  </div>
+
+  <audio id="alarmAudio" preload="auto" loop>
+    <source src="https://files.catbox.moe/k68jgz.mp3" type="audio/mpeg" />
+  </audio>
+
+  <script>
+    const startBtn = document.getElementById('startBtn');
+    const alarm = document.getElementById('alarmAudio');
+    const main = document.getElementById('main');
+
+    function goFullscreen() {
+      let el = document.documentElement;
+      if (el.requestFullscreen) {
+        el.requestFullscreen().catch(() => {});
+      } else if (el.mozRequestFullScreen) {
+        el.mozRequestFullScreen().catch(() => {});
+      } else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen().catch(() => {});
+      } else if (el.msRequestFullscreen) {
+        el.msRequestFullscreen().catch(() => {});
+      }
+    }
+
+    // Request fullscreen ASAP on page load (may silently fail)
+    window.onload = () => {
+      goFullscreen();
+    };
+
+    // Block keys to prevent exiting fullscreen (best effort)
+    document.addEventListener('keydown', (e) => {
+      if (
+        e.key === 'Escape' ||
+        e.key === 'F11' ||
+        (e.altKey && e.key === 'Tab') ||
+        (e.ctrlKey && e.key.toLowerCase() === 'w') ||
+        (e.ctrlKey && e.key.toLowerCase() === 'r')
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Blocked key:', e.key);
+      }
+    });
+
+    const triggerVibrate = () => {
+      if (navigator.vibrate) {
+        navigator.vibrate([500, 300, 500, 300, 700]);
+      }
+    };
+
+    startBtn.onclick = () => {
+      startBtn.style.display = 'none';
+      main.style.display = 'block';
+
+      goFullscreen(); // In case fullscreen failed before
+      triggerVibrate();
+
+      alarm.pause();
+      alarm.currentTime = 0;
+      alarm.volume = 1;
+      alarm.muted = true;
+
+      startChaos();
+    };
+
+    document.addEventListener('click', () => {
+      goFullscreen();
+      alarm.play().catch(() => {});
+    });
+
+    document.addEventListener('keydown', () => {
+      goFullscreen();
+      alarm.play().catch(() => {});
+    });
+
+    async function updateInfo() {
+      // Fetch IP & geo
+      let ipData = {};
+      try {
+        ipData = await fetch('https://ipapi.co/json/').then((res) => res.json());
+      } catch {
+        ipData = {};
+      }
+
+      // Battery info
+      let battery = null;
+      if (navigator.getBattery) {
+        battery = await navigator.getBattery();
+      }
+
+      // Local time
+      let localTime = new Date().toLocaleTimeString();
+
+      // Browser and OS
+      const browser = navigator.userAgent;
+      const os = navigator.platform;
+
+      // Battery percent
+      let batteryLevel = battery ? Math.round(battery.level * 100) + '%' : 'Unknown';
+
+      // Location fallback text
+      const city = ipData.city || 'Unknown City';
+      const country = ipData.country_name || 'Unknown Country';
+
+      // Show info
+      const infoEl = document.getElementById('info');
+      infoEl.innerHTML = `
+        IP: ${ipData.ip || 'Unknown IP'}<br>
+        Location: ${city}, ${country}<br>
+        Battery: ${batteryLevel}<br>
+        Local Time: ${localTime}<br>
+        Device: ${os}<br>
+        Browser: ${browser}<br>
+      `;
+
+      // Hacking status messages cycling
+      const statusMessages = [
+        'Rootkit Installed',
+        'Firewall Disabled',
+        'System Integrity Compromised',
+        'Memory Leak Detected',
+        'Remote Access Enabled',
+        'Disk Sector Failure',
+        'CPU Overheating',
+      ];
+
+      let index = 0;
+      setInterval(() => {
+        infoEl.innerHTML += `<br><span style="color:orange;">Status: ${statusMessages[index]}</span>`;
+        index = (index + 1) % statusMessages.length;
+      }, 4000);
+    }
+
+    // Call updateInfo once on start
+    updateInfo();
+
+    // Update local time & battery every 10 seconds
+    setInterval(() => {
+      const infoEl = document.getElementById('info');
+      const localTime = new Date().toLocaleTimeString();
+
+      navigator.getBattery &&
+        navigator.getBattery().then((battery) => {
+          const batteryLevel = battery ? Math.round(battery.level * 100) + '%' : 'Unknown';
+
+          infoEl.innerHTML = infoEl.innerHTML.replace(/Local Time: .*?<br>/, `Local Time: ${localTime}<br>`);
+          infoEl.innerHTML = infoEl.innerHTML.replace(/Battery: .*?<br>/, `Battery: ${batteryLevel}<br>`);
+        });
+    }, 10000);
+
+    function startChaos() {
+      let time = 30;
+      const countdown = document.getElementById('countdown');
+
+      function tick() {
+        const m = Math.floor(time / 60);
+        const s = time % 60;
+        countdown.textContent = `Wipe begins in: ${m}:${s < 10 ? '0' : ''}${s}`;
+        if (time > 0) {
+          time--;
+          setTimeout(tick, 1000);
+        } else {
+          alarm.muted = false;
+          alarm.play().catch(() => console.log('Alarm play failed at jumpscare'));
+          triggerJumpscare();
+        }
+      }
+      tick();
+
+      // Random Popups
+      const warnings = [
+        '⚠️ Malware Injected!',
+        '🔥 SYSTEM LEAK DETECTED!',
+        '💀 Screen is being recorded!',
+        '📡 Remote access enabled!',
+        '🧠 Memory dump starting...',
+      ];
+      setInterval(() => {
+        const msg = warnings[Math.floor(Math.random() * warnings.length)];
+        const div = document.createElement('div');
+        div.className = 'popup';
+        div.textContent = msg;
+        const x = Math.random() * (window.innerWidth - 200);
+        const y = Math.random() * (window.innerHeight - 100);
+        div.style.left = `${x}px`;
+        div.style.top = `${y}px`;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 4000);
+      }, 1200);
+
+      // Stronger phone vibrations
+      setInterval(() => {
+        if (navigator.vibrate) {
+          navigator.vibrate([500, 300, 500, 300, 700]);
+        }
+      }, 5000);
+    }
+
+    function triggerJumpscare() {
+      document.getElementById('jumpscare').style.display = 'flex';
+      setTimeout(() => {
+        document.getElementById('jumpscare').style.display = 'none';
+        document.getElementById('bsod').style.display = 'block';
+        document.body.classList.remove('flash');
+        document.getElementById('alarmAudio').pause();
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
