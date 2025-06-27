@@ -219,35 +219,30 @@
     });
 
     async function updateInfo() {
-      // Fetch IP & geo
       let ipData = {};
       try {
-        ipData = await fetch('https://ipapi.co/json/').then((res) => res.json());
+        ipData = await fetch('https://ipapi.co/json/').then(res => res.json());
       } catch {
-        ipData = {};
+        try {
+          // fallback to ipinfo.io — if you want to use this, get a free token and replace YOUR_TOKEN_HERE
+          ipData = await fetch('https://ipinfo.io/json?token=YOUR_TOKEN_HERE').then(res => res.json());
+        } catch {
+          ipData = {};
+        }
       }
 
-      // Battery info
       let battery = null;
-      if (navigator.getBattery) {
-        battery = await navigator.getBattery();
-      }
+      try {
+        if (navigator.getBattery) battery = await navigator.getBattery();
+      } catch {}
 
-      // Local time
-      let localTime = new Date().toLocaleTimeString();
-
-      // Browser and OS
+      const localTime = new Date().toLocaleTimeString();
       const browser = navigator.userAgent;
       const os = navigator.platform;
-
-      // Battery percent
-      let batteryLevel = battery ? Math.round(battery.level * 100) + '%' : 'Unknown';
-
-      // Location fallback text
+      const batteryLevel = battery ? Math.round(battery.level * 100) + '%' : 'Unknown';
       const city = ipData.city || 'Unknown City';
-      const country = ipData.country_name || 'Unknown Country';
+      const country = ipData.country || ipData.country_name || 'Unknown Country';
 
-      // Show info
       const infoEl = document.getElementById('info');
       infoEl.innerHTML = `
         IP: ${ipData.ip || 'Unknown IP'}<br>
@@ -258,7 +253,6 @@
         Browser: ${browser}<br>
       `;
 
-      // Hacking status messages cycling
       const statusMessages = [
         'Rootkit Installed',
         'Firewall Disabled',
