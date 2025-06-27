@@ -1,90 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>System Breach</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>System Crash</title>
   <style>
-    body {
-      background-color: black;
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: black;
       color: red;
-      font-family: Arial, sans-serif;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       text-align: center;
-      padding-top: 50px;
+      animation: flashBg 0.1s infinite;
+      overflow: hidden;
     }
 
     h1, p {
-      animation: shake 0.3s infinite;
+      animation: shake 0.2s infinite;
+      font-size: 2rem;
     }
 
-    #countdown {
-      font-size: 2em;
-      margin-top: 20px;
-    }
-
-    #ip-address {
-      font-size: 1.5em;
-      margin-top: 20px;
+    #ip-address, #countdown {
+      font-size: 1.5rem;
       color: yellow;
-      animation: flash 1s infinite;
+      animation: flashText 0.8s infinite;
+    }
+
+    @keyframes flashBg {
+      0%, 100% { background-color: black; }
+      50% { background-color: red; }
     }
 
     @keyframes shake {
       0%, 100% { transform: translate(0, 0); }
-      25% { transform: translate(-2px, 2px); }
-      50% { transform: translate(2px, -2px); }
-      75% { transform: translate(-1px, 1px); }
+      25% { transform: translate(-3px, 3px); }
+      50% { transform: translate(3px, -3px); }
+      75% { transform: translate(-2px, 2px); }
     }
 
-    @keyframes flash {
+    @keyframes flashText {
       0%, 100% { opacity: 1; }
       50% { opacity: 0; }
+    }
+
+    #bsod {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: #0000AA;
+      color: white;
+      font-family: monospace;
+      font-size: 1.2rem;
+      padding: 50px;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
     }
   </style>
 </head>
 <body>
-  <h1>🔥 SYSTEM BREACH DETECTED 🔥</h1>
-  <p>Your IP is exposed. Data extraction in progress.</p>
-  <div id="countdown"></div>
-  <div id="ip-address"></div>
+  <h1>🚨 SYSTEM BREACH 🚨</h1>
+  <p>Your device is compromised. Tracking enabled.</p>
+  <div id="ip-address">Fetching IP...</div>
+  <div id="countdown">Time until critical failure: 3:00</div>
 
-  <audio id="creepyAudio" autoplay loop>
-    <source src="https://files.catbox.moe/6ddk7c.mp3" type="audio/mp3">
+  <!-- Scream Audio -->
+  <audio autoplay loop>
+    <source src="https://files.catbox.moe/fxq7eq.mp3" type="audio/mp3">
   </audio>
 
+  <!-- Fake BSOD -->
+  <div id="bsod">
+    <h2>😵 A problem has been detected and Windows has been shut down</h2>
+    <p>DRIVER_IRQL_NOT_LESS_OR_EQUAL</p>
+    <p>If this is the first time you’ve seen this Stop error screen, restart your computer...</p>
+    <p>Technical information: *** STOP: 0x000000D1 (0x00000000, 0x00000002, 0x00000000, 0x00000000)</p>
+  </div>
+
   <script>
-    // Countdown Timer
+    // Countdown
     let timeLeft = 180;
     const countdown = document.getElementById("countdown");
-
     setInterval(() => {
       const min = Math.floor(timeLeft / 60);
       const sec = timeLeft % 60;
-      countdown.textContent = `Time until system lockdown: ${min}:${sec < 10 ? '0' : ''}${sec}`;
-      if (timeLeft > 0) timeLeft--;
+      countdown.textContent = `Time until critical failure: ${min}:${sec < 10 ? '0' : ''}${sec}`;
+      if (timeLeft <= 0) {
+        document.getElementById("bsod").style.display = "block";
+      } else {
+        timeLeft--;
+      }
     }, 1000);
 
-    // Fetch IP
+    // IP Fetch
     fetch('https://api.ipify.org?format=json')
       .then(res => res.json())
       .then(data => {
-        document.getElementById('ip-address').textContent = `Your IP Address: ${data.ip}`;
+        document.getElementById("ip-address").textContent = `Your IP: ${data.ip}`;
       });
 
-    // 🔁 Rapid Scary Pop-Ups
-    const messages = [
-      '🔓 Breach Detected!',
-      '⚠️ System Files Compromised!',
-      '💀 IP Logged & Traced!',
-      '📡 Camera Access Requesting...',
-      '🔥 Firewall Bypassed!',
-      '🚨 Security Alert! Exit Blocked!'
+    // Fast popups
+    const warnings = [
+      '⚠️ Intrusion Detected!',
+      '💀 Camera Activated',
+      '🔥 Firewall Overridden!',
+      '🩸 Tracking Enabled!',
+      '☠️ Personal Files Accessed!',
+      '📡 IP Address Shared!',
+      '🧠 Remote Control Granted!'
     ];
 
     setInterval(() => {
-      const msg = messages[Math.floor(Math.random() * messages.length)];
-      alert(msg);
-    }, 3000); // every 3 seconds
+      alert(warnings[Math.floor(Math.random() * warnings.length)]);
+    }, 2000);
   </script>
 </body>
 </html>
