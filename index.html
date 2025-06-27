@@ -1,63 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>YOU'RE BEING WATCHED</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      background-color: black;
-      color: red;
-      font-family: 'Courier New', monospace;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      overflow: hidden;
-      flex-direction: column;
-    }
-
-    h1 {
-      font-size: 3rem;
-      text-align: center;
-      animation: flicker 0.15s infinite;
-    }
-
-    .subtext {
-      color: white;
-      font-size: 1.2rem;
-      margin-top: 20px;
-      animation: glitch 1s infinite;
-    }
-
-    @keyframes flicker {
-      0% { opacity: 1; }
-      50% { opacity: 0.4; }
-      100% { opacity: 1; }
-    }
-
-    @keyframes glitch {
-      0% { transform: translate(0); }
-      20% { transform: translate(-2px, 2px); }
-      40% { transform: translate(-2px, -2px); }
-      60% { transform: translate(2px, 2px); }
-      80% { transform: translate(2px, -2px); }
-      100% { transform: translate(0); }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scary Prank</title>
+    <style>
+        body {
+            background-color: black;
+            color: red;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+        }
+        #countdown {
+            font-size: 2em;
+            margin-top: 20px;
+        }
+        .scary-text {
+            animation: shake 0.5s infinite;
+        }
+        #ip-address {
+            font-size: 1.5em;
+            margin-top: 20px;
+            color: yellow;
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+    </style>
 </head>
 <body>
-  <audio autoplay loop>
-    <source src="https://files.catbox.moe/6ddk7c.mp3" type="audio/mp3">
-  </audio>
-  <h1>IP LOGGED ⚠️</h1>
-  <div class="subtext">Your location has been traced.</div>
-  <div class="subtext">This device is now being monitored.</div>
-  <div class="subtext">There's no point in hiding.</div>
+    <h1 class="scary-text">IP Logged</h1>
+    <p class="scary-text">Your location has been traced. This device is now being monitored. There's no point in hiding.</p>
+    <div id="countdown"></div>
+    <div id="ip-address"></div>
+
+    <script>
+        // Countdown timer
+        let timeLeft = 300; // 5 minutes
+        const countdownElement = document.getElementById('countdown');
+        setInterval(() => {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            countdownElement.innerText = `Time until attack: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            timeLeft--;
+        }, 1000);
+
+        // Creepy sounds with maximum volume
+        const audio = new Audio('creepy-sound.mp3');
+        audio.volume = 1.0; // Set volume to maximum
+        audio.loop = true;
+        audio.play();
+
+        // Pop-ups
+        setInterval(() => {
+            alert('Your system is under attack!');
+        }, 10000);
+
+        // Fetch and display IP address
+        fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => {
+                const ipAddressElement = document.getElementById('ip-address');
+                ipAddressElement.innerText = `Your IP Address: ${data.ip}`;
+                ipAddressElement.style.animation = 'flash 1s infinite';
+            })
+            .catch(error => {
+                console.error('Error fetching IP address:', error);
+            });
+
+        // Flash animation for IP address
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes flash {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>
