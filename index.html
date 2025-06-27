@@ -102,82 +102,126 @@
       box-shadow: 0 0 20px red;
       animation: shake 0.3s infinite;
     }
+
+    #startBtn {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 40px;
+      font-size: 1.5rem;
+      background: red;
+      color: white;
+      border: none;
+      z-index: 10001;
+      cursor: pointer;
+    }
   </style>
 </head>
-<body class="flash">
-  <h1>SYSTEM BREACH DETECTED</h1>
-  <div id="countdown">Wipe begins in: 3:00</div>
-  <div id="info">Locating target device...</div>
+<body>
+  <button id="startBtn">CLICK TO START</button>
 
-  <div id="jumpscare">
-    <img src="https://media.tenor.com/wC6F0gGEM1gAAAAC/jumpscare.gif" alt="SCREAM">
+  <div id="main" style="display:none" class="flash">
+    <h1>SYSTEM BREACH DETECTED</h1>
+    <div id="countdown">Wipe begins in: 3:00</div>
+    <div id="info">Locating target device...</div>
+
+    <div id="jumpscare">
+      <img src="https://media.tenor.com/wC6F0gGEM1gAAAAC/jumpscare.gif" alt="SCREAM">
+    </div>
+
+    <div id="bsod">
+      😵 A critical system failure has occurred.<br><br>
+      BROADYG_FATAL_ERROR<br><br>
+      *** STOP: 0x000000FE (BROADYG.EXE, SYSTEM_OVERRUN, 0x00000000)<br>
+      Collecting data for crash dump...<br>
+      Initializing disk for memory dump...<br>
+      The system has been halted.<br><br>
+      <i>You're not safe.</i>
+    </div>
   </div>
 
-  <div id="bsod">
-    😵 A critical system failure has occurred.<br><br>
-    BROADYG_FATAL_ERROR<br><br>
-    *** STOP: 0x000000FE (BROADYG.EXE, SYSTEM_OVERRUN, 0x00000000)<br>
-    Collecting data for crash dump...<br>
-    Initializing disk for memory dump...<br>
-    The system has been halted.<br><br>
-    <i>You're not safe.</i>
-  </div>
-
-  <audio id="alarmAudio" autoplay loop>
-    <source src="https://files.catbox.moe/gbg5lm.mp3" type="audio/mp3">
+  <audio id="alarmAudio" loop>
+    <source src="https://files.catbox.moe/k68jgz.mp3" type="audio/mpeg">
   </audio>
 
   <script>
-    // Countdown
-    let time = 180;
-    const countdown = document.getElementById("countdown");
-    function tick() {
-      const m = Math.floor(time / 60);
-      const s = time % 60;
-      countdown.textContent = `Wipe begins in: ${m}:${s < 10 ? '0' : ''}${s}`;
-      if (time > 0) {
-        time--;
-        setTimeout(tick, 1000);
-      } else {
-        triggerJumpscare();
+    const startBtn = document.getElementById('startBtn');
+    const alarm = document.getElementById('alarmAudio');
+    const main = document.getElementById('main');
+
+    startBtn.onclick = async () => {
+      startBtn.style.display = 'none';
+      main.style.display = 'block';
+
+      // Try fullscreen
+      const el = document.documentElement;
+      if (el.requestFullscreen) await el.requestFullscreen();
+
+      // Start alarm
+      alarm.volume = 1;
+      alarm.play().catch(() => console.log("Audio play failed"));
+
+      // Start rest of the chaos
+      startChaos();
+    };
+
+    function startChaos() {
+      // Countdown
+      let time = 180;
+      const countdown = document.getElementById("countdown");
+      function tick() {
+        const m = Math.floor(time / 60);
+        const s = time % 60;
+        countdown.textContent = `Wipe begins in: ${m}:${s < 10 ? '0' : ''}${s}`;
+        if (time > 0) {
+          time--;
+          setTimeout(tick, 1000);
+        } else {
+          triggerJumpscare();
+        }
+      }
+      tick();
+
+      // IP info
+      fetch('https://api.ipify.org?format=json')
+        .then(res => res.json())
+        .then(data => {
+          const browser = navigator.userAgent;
+          const os = navigator.platform;
+          document.getElementById('info').innerHTML = `
+            IP: ${data.ip}<br>
+            Device: ${os}<br>
+            Browser: ${browser}
+          `;
+        });
+
+      // Popups
+      const warnings = [
+        "⚠️ Malware Injected!",
+        "🔥 SYSTEM LEAK DETECTED!",
+        "💀 Screen is being recorded!",
+        "📡 Remote access enabled!",
+        "🧠 Memory dump starting..."
+      ];
+      let popupCount = 0;
+      setInterval(() => {
+        const msg = warnings[Math.floor(Math.random() * warnings.length)];
+        const div = document.createElement('div');
+        div.className = 'popup';
+        div.style.setProperty('--i', popupCount);
+        div.textContent = msg;
+        document.body.appendChild(div);
+        popupCount++;
+        if (popupCount > 10) popupCount = 0;
+      }, 1500);
+
+      // Vibrate phone
+      if ('vibrate' in navigator) {
+        setInterval(() => navigator.vibrate([200, 100, 300]), 3000);
       }
     }
-    tick();
 
-    // Info (IP, device, browser)
-    fetch('https://api.ipify.org?format=json')
-      .then(res => res.json())
-      .then(data => {
-        const browser = navigator.userAgent;
-        const os = navigator.platform;
-        document.getElementById('info').innerHTML = `
-          IP: ${data.ip}<br>
-          Device: ${os}<br>
-          Browser: ${browser}
-        `;
-      });
-
-    // Custom Fake Popups
-    const warnings = [
-      "⚠️ Malware Injected!",
-      "🔥 SYSTEM LEAK DETECTED!",
-      "💀 Screen is being recorded!",
-      "📡 Remote access enabled!",
-      "🧠 Memory dump starting..."
-    ];
-    let popupCount = 0;
-    setInterval(() => {
-      const msg = warnings[Math.floor(Math.random() * warnings.length)];
-      const div = document.createElement('div');
-      div.className = 'popup';
-      div.style.setProperty('--i', popupCount);
-      div.textContent = msg;
-      document.body.appendChild(div);
-      popupCount++;
-      if (popupCount > 10) popupCount = 0;
-    }, 1500);
-
-    // Jumpscare + BSOD
     function triggerJumpscare() {
       document.getElementById('jumpscare').style.display = 'flex';
       setTimeout(() => {
@@ -186,17 +230,6 @@
         document.body.classList.remove('flash');
         document.getElementById('alarmAudio').pause();
       }, 5000);
-    }
-
-    // Auto fullscreen
-    document.addEventListener('click', () => {
-      const doc = document.documentElement;
-      if (doc.requestFullscreen) doc.requestFullscreen();
-    });
-
-    // Phone vibration
-    if ('vibrate' in navigator) {
-      setInterval(() => navigator.vibrate([200, 100, 300]), 3000);
     }
   </script>
 </body>
