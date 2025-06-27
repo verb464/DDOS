@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>💀 BROADYG.EXE 💀</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -9,7 +9,7 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      background-color: black;
+      background: black;
       font-family: monospace;
       color: red;
       overflow: hidden;
@@ -88,39 +88,50 @@
       z-index: 10000;
       text-align: left;
     }
+
+    .popup {
+      position: fixed;
+      top: calc(20% + calc(var(--i) * 40px));
+      left: calc(10% + calc(var(--i) * 20px));
+      background: white;
+      color: black;
+      border: 3px solid red;
+      padding: 15px;
+      z-index: 999;
+      font-weight: bold;
+      box-shadow: 0 0 20px red;
+      animation: shake 0.3s infinite;
+    }
   </style>
 </head>
-<body class="flash" onmousemove="freezeMouse(event)">
+<body class="flash">
   <h1>SYSTEM BREACH DETECTED</h1>
   <div id="countdown">Wipe begins in: 3:00</div>
   <div id="info">Locating target device...</div>
 
-  <!-- Screamer -->
   <div id="jumpscare">
-    <img src="https://media.tenor.com/wC6F0gGEM1gAAAAC/jumpscare.gif" alt="JUMPSCARE">
+    <img src="https://media.tenor.com/wC6F0gGEM1gAAAAC/jumpscare.gif" alt="SCREAM">
   </div>
 
-  <!-- Fake Blue Screen -->
   <div id="bsod">
     😵 A critical system failure has occurred.<br><br>
     BROADYG_FATAL_ERROR<br><br>
     *** STOP: 0x000000FE (BROADYG.EXE, SYSTEM_OVERRUN, 0x00000000)<br>
     Collecting data for crash dump...<br>
     Initializing disk for memory dump...<br>
-    Contact your administrator.<br>
     The system has been halted.<br><br>
-    <i>Thanks for playing 💀</i>
+    <i>You're not safe.</i>
   </div>
 
-  <audio id="screamAudio" autoplay loop>
-    <source src="https://files.catbox.moe/h2l3dv.mp3" type="audio/mp3">
+  <audio id="alarmAudio" autoplay loop>
+    <source src="https://files.catbox.moe/gbg5lm.mp3" type="audio/mp3">
   </audio>
 
   <script>
-    // COUNTDOWN
+    // Countdown
     let time = 180;
     const countdown = document.getElementById("countdown");
-    const tick = () => {
+    function tick() {
       const m = Math.floor(time / 60);
       const s = time % 60;
       countdown.textContent = `Wipe begins in: ${m}:${s < 10 ? '0' : ''}${s}`;
@@ -130,67 +141,62 @@
       } else {
         triggerJumpscare();
       }
-    };
+    }
     tick();
 
-    // INFO FILLER
-    const info = document.getElementById("info");
+    // Info (IP, device, browser)
     fetch('https://api.ipify.org?format=json')
       .then(res => res.json())
       .then(data => {
         const browser = navigator.userAgent;
         const os = navigator.platform;
-        info.innerHTML = `
+        document.getElementById('info').innerHTML = `
           IP: ${data.ip}<br>
           Device: ${os}<br>
           Browser: ${browser}
         `;
       });
 
-    // POP-UP SPAM
+    // Custom Fake Popups
     const warnings = [
       "⚠️ Malware Injected!",
       "🔥 SYSTEM LEAK DETECTED!",
-      "💀 Your screen is being recorded!",
-      "📡 Remote access active!",
-      "🧠 Memory corruption in progress..."
+      "💀 Screen is being recorded!",
+      "📡 Remote access enabled!",
+      "🧠 Memory dump starting..."
     ];
+    let popupCount = 0;
     setInterval(() => {
-      alert(warnings[Math.floor(Math.random() * warnings.length)]);
+      const msg = warnings[Math.floor(Math.random() * warnings.length)];
+      const div = document.createElement('div');
+      div.className = 'popup';
+      div.style.setProperty('--i', popupCount);
+      div.textContent = msg;
+      document.body.appendChild(div);
+      popupCount++;
+      if (popupCount > 10) popupCount = 0;
     }, 1500);
 
-    // JUMPSCARE
+    // Jumpscare + BSOD
     function triggerJumpscare() {
-      document.getElementById("jumpscare").style.display = "flex";
+      document.getElementById('jumpscare').style.display = 'flex';
       setTimeout(() => {
-        document.getElementById("jumpscare").style.display = "none";
-        document.getElementById("bsod").style.display = "block";
-        document.body.classList.remove("flash");
-        document.getElementById("screamAudio").pause();
+        document.getElementById('jumpscare').style.display = 'none';
+        document.getElementById('bsod').style.display = 'block';
+        document.body.classList.remove('flash');
+        document.getElementById('alarmAudio').pause();
       }, 5000);
     }
 
-    // FORCE FULLSCREEN
-    document.addEventListener("click", () => {
-      const docElm = document.documentElement;
-      if (docElm.requestFullscreen) docElm.requestFullscreen();
+    // Auto fullscreen
+    document.addEventListener('click', () => {
+      const doc = document.documentElement;
+      if (doc.requestFullscreen) doc.requestFullscreen();
     });
 
-    // VIBRATION
-    if ("vibrate" in navigator) {
-      setInterval(() => navigator.vibrate([200, 100, 300]), 2000);
-    }
-
-    // FAKE MOUSE FREEZE
-    let frozen = false;
-    function freezeMouse(e) {
-      if (!frozen) {
-        frozen = true;
-        setTimeout(() => {
-          window.scrollTo(0, 0);
-          document.body.style.pointerEvents = "none";
-        }, 7000); // Freeze after 7s
-      }
+    // Phone vibration
+    if ('vibrate' in navigator) {
+      setInterval(() => navigator.vibrate([200, 100, 300]), 3000);
     }
   </script>
 </body>
