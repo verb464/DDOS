@@ -91,8 +91,6 @@
 
     .popup {
       position: fixed;
-      top: calc(20% + calc(var(--i) * 40px));
-      left: calc(10% + calc(var(--i) * 20px));
       background: white;
       color: black;
       border: 3px solid red;
@@ -141,7 +139,7 @@
     </div>
   </div>
 
-  <audio id="alarmAudio" loop>
+  <audio id="alarmAudio" preload="auto" loop>
     <source src="https://files.catbox.moe/k68jgz.mp3" type="audio/mpeg">
   </audio>
 
@@ -150,21 +148,43 @@
     const alarm = document.getElementById('alarmAudio');
     const main = document.getElementById('main');
 
-    startBtn.onclick = async () => {
+    const triggerFullscreen = () => {
+      const doc = document.documentElement;
+      if (doc.requestFullscreen) doc.requestFullscreen().catch(()=>{});
+    };
+
+    const triggerVibrate = () => {
+      if (navigator.vibrate) {
+        navigator.vibrate([500, 300, 500, 300, 700]);
+      }
+    };
+
+    // Start button click
+    startBtn.onclick = () => {
       startBtn.style.display = 'none';
       main.style.display = 'block';
 
-      // Try fullscreen
-      const el = document.documentElement;
-      if (el.requestFullscreen) await el.requestFullscreen();
+      triggerFullscreen();
+      triggerVibrate();
 
-      // Start alarm
       alarm.volume = 1;
-      alarm.play().catch(() => console.log("Audio play failed"));
+      alarm.play().catch(() => {
+        console.log("Alarm playback failed. Waiting for another click.");
+      });
 
-      // Start rest of the chaos
       startChaos();
     };
+
+    // Extra triggers for fullscreen + audio in case first fails
+    document.addEventListener('click', () => {
+      triggerFullscreen();
+      alarm.play().catch(() => {});
+    });
+
+    document.addEventListener('keydown', () => {
+      triggerFullscreen();
+      alarm.play().catch(() => {});
+    });
 
     function startChaos() {
       // Countdown
@@ -183,7 +203,7 @@
       }
       tick();
 
-      // IP info
+      // Get IP
       fetch('https://api.ipify.org?format=json')
         .then(res => res.json())
         .then(data => {
@@ -196,7 +216,7 @@
           `;
         });
 
-      // Popups
+      // Random Popups
       const warnings = [
         "⚠️ Malware Injected!",
         "🔥 SYSTEM LEAK DETECTED!",
@@ -204,22 +224,21 @@
         "📡 Remote access enabled!",
         "🧠 Memory dump starting..."
       ];
-      let popupCount = 0;
       setInterval(() => {
         const msg = warnings[Math.floor(Math.random() * warnings.length)];
         const div = document.createElement('div');
         div.className = 'popup';
-        div.style.setProperty('--i', popupCount);
         div.textContent = msg;
+        const x = Math.random() * (window.innerWidth - 200);
+        const y = Math.random() * (window.innerHeight - 100);
+        div.style.left = `${x}px`;
+        div.style.top = `${y}px`;
         document.body.appendChild(div);
-        popupCount++;
-        if (popupCount > 10) popupCount = 0;
-      }, 1500);
+        setTimeout(() => div.remove(), 4000);
+      }, 1200);
 
-      // Vibrate phone
-      if ('vibrate' in navigator) {
-        setInterval(() => navigator.vibrate([200, 100, 300]), 3000);
-      }
+      // Stronger phone vibrations
+      setInterval(triggerVibrate, 5000);
     }
 
     function triggerJumpscare() {
