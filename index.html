@@ -20,10 +20,19 @@
       animation: flash-bg 0.1s infinite;
     }
 
+    .flash-red {
+      animation: redFlash 0.1s infinite;
+    }
+
     @keyframes flash-bg {
       0% { background: red; }
       50% { background: white; }
       100% { background: black; }
+    }
+
+    @keyframes redFlash {
+      0%, 100% { background-color: black; }
+      50% { background-color: red; }
     }
 
     h1 {
@@ -77,6 +86,12 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      animation: zoom 0.2s alternate infinite;
+    }
+
+    @keyframes zoom {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
     }
 
     #bsod {
@@ -146,65 +161,54 @@
   </div>
 
   <audio id="alarmAudio" preload="auto" loop>
-    <source src="https://files.catbox.moe/k68jgz.mp3" type="audio/mpeg" />
+    <source src="https://files.catbox.moe/0a2w8d.mp3" type="audio/mpeg" />
+  </audio>
+
+  <audio id="screamer" preload="auto">
+    <source src="https://files.catbox.moe/t2fihy.mp3" type="audio/mpeg" />
   </audio>
 
   <script>
     const startBtn = document.getElementById('startBtn');
     const alarm = document.getElementById('alarmAudio');
+    const screamer = document.getElementById('screamer');
     const main = document.getElementById('main');
 
     function goFullscreen() {
       let el = document.documentElement;
-      if (el.requestFullscreen) {
-        el.requestFullscreen().catch(() => {});
-      } else if (el.mozRequestFullScreen) {
-        el.mozRequestFullScreen().catch(() => {});
-      } else if (el.webkitRequestFullscreen) {
-        el.webkitRequestFullscreen().catch(() => {});
-      } else if (el.msRequestFullscreen) {
-        el.msRequestFullscreen().catch(() => {});
-      }
+      if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+      else if (el.mozRequestFullScreen) el.mozRequestFullScreen().catch(() => {});
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen().catch(() => {});
+      else if (el.msRequestFullscreen) el.msRequestFullscreen().catch(() => {});
     }
 
-    // Request fullscreen ASAP on page load (may silently fail)
-    window.onload = () => {
-      goFullscreen();
-    };
+    window.onload = () => { goFullscreen(); };
 
-    // Block keys to prevent exiting fullscreen (best effort)
     document.addEventListener('keydown', (e) => {
-      if (
-        e.key === 'Escape' ||
-        e.key === 'F11' ||
-        (e.altKey && e.key === 'Tab') ||
-        (e.ctrlKey && e.key.toLowerCase() === 'w') ||
-        (e.ctrlKey && e.key.toLowerCase() === 'r')
-      ) {
+      if (e.key === 'Escape' || e.key === 'F11' ||
+          (e.altKey && e.key === 'Tab') ||
+          (e.ctrlKey && e.key.toLowerCase() === 'w') ||
+          (e.ctrlKey && e.key.toLowerCase() === 'r')) {
         e.preventDefault();
         e.stopPropagation();
-        console.log('Blocked key:', e.key);
       }
     });
 
     const triggerVibrate = () => {
-      if (navigator.vibrate) {
-        navigator.vibrate([500, 300, 500, 300, 700]);
-      }
+      if (navigator.vibrate) navigator.vibrate([500, 300, 500, 300, 700]);
     };
 
     startBtn.onclick = () => {
       startBtn.style.display = 'none';
       main.style.display = 'block';
-
-      goFullscreen(); // In case fullscreen failed before
+      goFullscreen();
       triggerVibrate();
 
       alarm.pause();
       alarm.currentTime = 0;
       alarm.volume = 1;
-      alarm.muted = true;
-
+      alarm.muted = false;
+      alarm.play().catch(() => {});
       startChaos();
     };
 
@@ -222,15 +226,7 @@
       let ipData = {};
       try {
         ipData = await fetch('https://ipapi.co/json/').then(res => res.json());
-      } catch {
-        try {
-          // fallback to ipinfo.io — if you want to use this, get a free token and replace YOUR_TOKEN_HERE
-          ipData = await fetch('https://ipinfo.io/json?token=YOUR_TOKEN_HERE').then(res => res.json());
-        } catch {
-          ipData = {};
-        }
-      }
-
+      } catch {}
       let battery = null;
       try {
         if (navigator.getBattery) battery = await navigator.getBattery();
@@ -270,18 +266,14 @@
       }, 4000);
     }
 
-    // Call updateInfo once on start
     updateInfo();
 
-    // Update local time & battery every 10 seconds
     setInterval(() => {
       const infoEl = document.getElementById('info');
       const localTime = new Date().toLocaleTimeString();
-
       navigator.getBattery &&
         navigator.getBattery().then((battery) => {
           const batteryLevel = battery ? Math.round(battery.level * 100) + '%' : 'Unknown';
-
           infoEl.innerHTML = infoEl.innerHTML.replace(/Local Time: .*?<br>/, `Local Time: ${localTime}<br>`);
           infoEl.innerHTML = infoEl.innerHTML.replace(/Battery: .*?<br>/, `Battery: ${batteryLevel}<br>`);
         });
@@ -290,7 +282,6 @@
     function startChaos() {
       let time = 30;
       const countdown = document.getElementById('countdown');
-
       function tick() {
         const m = Math.floor(time / 60);
         const s = time % 60;
@@ -299,14 +290,11 @@
           time--;
           setTimeout(tick, 1000);
         } else {
-          alarm.muted = false;
-          alarm.play().catch(() => console.log('Alarm play failed at jumpscare'));
           triggerJumpscare();
         }
       }
       tick();
 
-      // Random Popups
       const warnings = [
         '⚠️ Malware Injected!',
         '🔥 SYSTEM LEAK DETECTED!',
@@ -327,21 +315,21 @@
         setTimeout(() => div.remove(), 4000);
       }, 1200);
 
-      // Stronger phone vibrations
       setInterval(() => {
-        if (navigator.vibrate) {
-          navigator.vibrate([500, 300, 500, 300, 700]);
-        }
+        if (navigator.vibrate) navigator.vibrate([500, 300, 500, 300, 700]);
       }, 5000);
     }
 
     function triggerJumpscare() {
+      document.body.classList.add('flash-red');
       document.getElementById('jumpscare').style.display = 'flex';
+      screamer.play().catch(() => {});
       setTimeout(() => {
         document.getElementById('jumpscare').style.display = 'none';
         document.getElementById('bsod').style.display = 'block';
         document.body.classList.remove('flash');
-        document.getElementById('alarmAudio').pause();
+        document.body.classList.remove('flash-red');
+        alarm.pause();
       }, 5000);
     }
   </script>
